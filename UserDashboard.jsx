@@ -1,21 +1,16 @@
 import React, { useState } from 'react';
 import { Star, Send, Loader2 } from 'lucide-react';
 
-// ============================================================================
-// POLYFILL: Mock window.storage for environments lacking a custom storage API
-// NOTE: In a real app, this would be an actual API or a Node.js endpoint call.
-// This is done to prevent the code from crashing when window.storage is undefined.
-// ============================================================================
+
 if (typeof window.storage === 'undefined') {
     window.storage = {
-        // This function simulates saving data to a local DB/file structure
+        
         set: async (key, value, shouldLog) => {
             if (shouldLog) {
                 console.log(`[STORAGE MOCK] Storing data under key: ${key}`);
                 console.log("Data saved (simulated):", JSON.parse(value));
             }
-            // In a Python/Node.js backend, THIS is where the fetch() call 
-            // to a server endpoint would trigger saving the CSV/JSON file.
+           
             return Promise.resolve(true);
         }
     };
@@ -30,10 +25,9 @@ export default function UserDashboard() {
   const [aiResponse, setAiResponse] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
-  const GEMINI_API_KEY = "AIzaSyDEuzSUl2PUYHjPcEB5qJQpMZEuy4FNvvI"; // WARNING: Replace this placeholder key
+  const GEMINI_API_KEY = "AIzaSyDEuzSUl2PUYHjPcEB5qJQpMZEuy4FNvvI"; 
 
   const generateAIResponse = async (rating, review) => {
-    // Prompt structure ensures the AI returns a concise customer service response.
     const promptText = `
 You are a customer service AI. A user has submitted feedback with a ${rating}-star rating and the following review: "${review}". 
 
@@ -68,15 +62,12 @@ Respond directly without any preamble.
       const data = await response.json();
       
       if (data.candidates && data.candidates[0]?.content?.parts[0]?.text) {
-        // AI-generated response returned
         return data.candidates[0].content.parts[0].text;
       }
       
-      // Fallback if API fails to provide a candidate
       return "Thank you for your detailed feedback! We appreciate you taking the time to share your experience with us.";
     } catch (error) {
       console.error('AI generation error:', error);
-      // Fallback response for network/API key error
       return "Thank you for your feedback. We appreciate your time.";
     }
   };
@@ -91,7 +82,6 @@ Respond directly without any preamble.
   setAiResponse('');
 
   try {
-    // Send only rating + review
     const response = await fetch("http://localhost:5000/api/feedback", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -99,8 +89,6 @@ Respond directly without any preamble.
     });
 
     const result = await response.json();
-
-    // ✅ Use backend’s AI response
     setAiResponse(result.aiResponse);
     setSubmitted(true);
   } catch (error) {
@@ -177,7 +165,6 @@ Respond directly without any preamble.
                 value={review}
                 onChange={(e) => setReview(e.target.value)}
                 placeholder="Share your thoughts, suggestions, or concerns..."
-                // FIX: Removed mx-auto w-3/4 to let w-full handle text area width
                 className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-left"
                 rows={6}
                 disabled={loading}
@@ -243,4 +230,5 @@ Respond directly without any preamble.
       </div>
     </div>
   );
+
 }
